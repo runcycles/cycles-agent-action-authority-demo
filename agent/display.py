@@ -138,8 +138,10 @@ class DemoDisplay:
                 lines.append(Text("All actions approved.", style="green bold"))
 
         lines.append(Text(""))
+        a_word = "action" if s.approved_count == 1 else "actions"
+        b_word = "action" if s.blocked_count == 1 else "actions"
         lines.append(Text(
-            f"{s.approved_count} actions approved \u00b7 {s.blocked_count} actions blocked",
+            f"{s.approved_count} {a_word} approved \u00b7 {s.blocked_count} {b_word} blocked",
             style="bold",
         ))
 
