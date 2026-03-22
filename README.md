@@ -96,37 +96,37 @@ Stack is up.
   MODE 1: Without Cycles
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-╭──────────── Support Case #4782 ─────────────╮
-│ Customer:  Acme Corp (jane@acme.com)         │
-│ Subject:   Invoice shows $847, contract $720 │
-│ Agent:     support-bot                       │
-│ Mode:      UNGUARDED                         │
-╰──────────────────────────────────────────────╯
+╭──────────── Support Case #4782 ───────────────╮
+│ Customer:  Acme Corp (jane@acme.com)          │
+│ Subject:   Invoice shows $847, contract $720  │
+│ Agent:     support-bot                        │
+│ Mode:      UNGUARDED                          │
+╰───────────────────────────────────────────────╯
 
-╭──────────── Action Log ──────────────────────╮
+╭──────────── Action Log ───────────────────────╮
 │  ✓ read_case                                  │
 │  ✓ append_internal_note  [internal-notes]     │
 │  ✓ update_crm_status     [crm-updates]        │
 │  ✓ send_customer_email   [send-email]         │
-╰──────────────────────────────────────────────╯
+╰───────────────────────────────────────────────╯
 
-╭──────────── Result — UNGUARDED ──────────────╮
+╭──────────── Result — UNGUARDED ───────────────╮
 │ All actions executed — including the email.   │
 │ 4 actions approved · 0 actions blocked        │
-╰──────────────────────────────────────────────╯
+╰───────────────────────────────────────────────╯
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   MODE 2: With Cycles (action authority)
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-╭──────────── Support Case #4782 ─────────────╮
-│ Customer:  Acme Corp (jane@acme.com)         │
-│ Subject:   Invoice shows $847, contract $720 │
-│ Agent:     support-bot                       │
-│ Mode:      GUARDED                           │
-╰──────────────────────────────────────────────╯
+╭──────────── Support Case #4782 ───────────────╮
+│ Customer:  Acme Corp (jane@acme.com)          │
+│ Subject:   Invoice shows $847, contract $720  │
+│ Agent:     support-bot                        │
+│ Mode:      GUARDED                            │
+╰───────────────────────────────────────────────╯
 
-╭──────────── Action Log ──────────────────────╮
+╭──────────── Action Log ───────────────────────╮
 │  ✓ read_case                                  │
 │    Loaded case #4782 — Acme Corp              │
 │                                               │
@@ -140,14 +140,14 @@ Stack is up.
 │                                               │
 │  ✗ send_customer_email   [send-email]         │
 │    POST /v1/reservations → 409 BUDGET_EXCEEDED│
-│    Email blocked — not approved for autonomous use.│
-╰──────────────────────────────────────────────╯
+│    Email blocked — not approved autonomously. │
+╰───────────────────────────────────────────────╯
 
-╭──────────── Result — GUARDED ────────────────╮
+╭──────────── Result — GUARDED ─────────────────╮
 │ Cycles blocked the customer email before it   │
 │ was sent.                                     │
 │ 3 actions approved · 1 action blocked         │
-╰──────────────────────────────────────────────╯
+╰───────────────────────────────────────────────╯
 
 Demo complete.
   Swagger UI:   http://localhost:7878/swagger-ui.html
