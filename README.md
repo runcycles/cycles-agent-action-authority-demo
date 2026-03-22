@@ -2,7 +2,7 @@
 
 An agent can use CRM, notes, and email — but Cycles decides which actions are allowed before execution.
 
-Same agent. Same tools. Only approved actions execute.
+Same agent. Same tools. The next unapproved action never executes.
 
 ## The scenario
 
@@ -15,7 +15,7 @@ A support automation agent handles customer case #4782 (invoice discrepancy). Th
 
 Steps 1–3 are internal, low-risk operations. Step 4 is a consequential, customer-facing action. In production, you want a human to approve outbound emails before they go out. Cycles enforces this by only provisioning budgets for approved toolsets.
 
-Without Cycles, all four steps execute — including the email. With Cycles, the server returns `409 BUDGET_EXCEEDED` before the email send can proceed, and the agent reports: "Email NOT sent — escalated to human for approval."
+Without Cycles, all four steps execute — including the email. With Cycles, the server returns `409 BUDGET_EXCEEDED` before the email send can proceed, and the agent reports: "Email blocked — not approved for autonomous execution. Escalated to human review."
 
 No real CRM, email service, or ticketing system is used. All tools are mocked locally. The action authority is real.
 
@@ -77,12 +77,12 @@ The first run pulls three Docker images (~200MB total). You'll see Docker's pull
 ### Without Cycles
 
 All four actions execute with green checkmarks — including the customer email. The final panel reads:
-> *"All actions executed — including the customer email. In production: no approval gate existed. The email went out unchecked."*
+> *"All actions executed — including the customer email. In production: no authorization gate existed. The email went out unchecked."*
 
 ### With Cycles (action authority)
 
 The first three actions execute with green checkmarks. The fourth (send email) shows a red X. The final panel reads:
-> *"Cycles blocked the customer email before it was sent. Internal actions proceeded. Customer-facing action requires human approval."*
+> *"Cycles blocked the customer email before it was sent. Internal actions proceeded. Customer-facing action not approved for autonomous execution."*
 
 ### Expected output
 
@@ -140,7 +140,7 @@ Stack is up.
 │                                               │
 │  ✗ send_customer_email   [send-email]         │
 │    POST /v1/reservations → 409 BUDGET_EXCEEDED│
-│    Email NOT sent — escalated to human.       │
+│    Email blocked — not approved for autonomous use.│
 ╰──────────────────────────────────────────────╯
 
 ╭──────────── Result — GUARDED ────────────────╮
@@ -183,10 +183,10 @@ def send_customer_email(...): ...
 
 # --- Catch the budget exception ---
 except BudgetExceededError:
-    # email not sent — escalated to human
+    # email blocked — not approved for autonomous execution
 ```
 
-Three decorators. One except. Only approved actions execute.
+Three decorators. One except. The next unapproved action never executes.
 
 ## How it works
 

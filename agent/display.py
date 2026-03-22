@@ -121,7 +121,7 @@ class DemoDisplay:
                 style="bold orange1",
             ))
             lines.append(Text(
-                "Internal actions proceeded. Customer-facing action requires human approval.",
+                "Internal actions proceeded. Customer-facing action not approved for autonomous execution.",
                 style="dim",
             ))
         else:
@@ -131,7 +131,7 @@ class DemoDisplay:
                     style="red bold",
                 ))
                 lines.append(Text(
-                    "In production: no approval gate existed. The email went out unchecked.",
+                    "In production: no authorization gate existed. The email went out unchecked.",
                     style="red",
                 ))
             else:

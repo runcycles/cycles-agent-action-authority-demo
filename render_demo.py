@@ -95,7 +95,7 @@ def run_mode(mode: str) -> None:
             name="send_customer_email",
             toolset="send-email",
             allowed=False,
-            detail="Email NOT sent \u2014 escalated to human for approval.",
+            detail="Email blocked \u2014 not approved for autonomous execution. Escalated to human review.",
             cycles_response="409 BUDGET_EXCEEDED",
         ))
     else:
