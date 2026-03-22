@@ -72,6 +72,8 @@ The first run pulls three Docker images (~200MB total). You'll see Docker's pull
 
 ## What you'll see
 
+![Cycles Action Authority Demo](demo.gif)
+
 ### Without Cycles
 
 All four actions execute with green checkmarks — including the customer email. The final panel reads:
