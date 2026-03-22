@@ -2,7 +2,7 @@
 Unguarded agent — no action authority.
 
 All tool calls execute unconditionally.
-The customer email goes out without any approval gate.
+The customer email goes out without any authorization gate.
 """
 from __future__ import annotations
 

@@ -6,7 +6,7 @@ with @cycles using a toolset parameter. The Cycles server only has
 budgets for approved toolsets (internal-notes, crm-updates).
 The send-email toolset has no budget — Cycles blocks it.
 
-Three decorators. One except. Only approved actions execute.
+Three decorators. One except. The next unapproved action never executes.
 """
 from __future__ import annotations
 
@@ -127,7 +127,7 @@ def run() -> None:
                 name="send_customer_email",
                 toolset="send-email",
                 allowed=False,
-                detail="Email NOT sent \u2014 escalated to human for approval.",
+                detail="Email blocked \u2014 not approved for autonomous execution. Escalated to human review.",
                 cycles_response="409 BUDGET_EXCEEDED",
             ))
 
