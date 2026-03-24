@@ -64,9 +64,9 @@ for SCOPE in \
 done
 echo "  Hierarchy budgets: \$1.00 each" >&2
 
-# 4. Toolset-level budgets — ONLY for approved actions.
+# 4. Toolset-level budgets — approved actions get $1.00, blocked actions get $0.
 #    internal-notes and crm-updates are approved.
-#    send-email is deliberately NOT provisioned — Cycles will return 409.
+#    send-email gets a $0 budget — Cycles will return 409 BUDGET_EXCEEDED.
 for TOOLSET in "internal-notes" "crm-updates"; do
   SCOPE="tenant:$TENANT_ID/workspace:default/app:default/workflow:default/agent:support-bot/toolset:$TOOLSET"
   HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" -X POST "$ADMIN_URL/budgets" \
@@ -81,7 +81,21 @@ for TOOLSET in "internal-notes" "crm-updates"; do
     exit 1
   fi
 done
-echo "  Toolset budgets: internal-notes ✓  crm-updates ✓  send-email ✗" >&2
+
+# send-email: $0 budget — the action will be blocked before execution.
+SCOPE="tenant:$TENANT_ID/workspace:default/app:default/workflow:default/agent:support-bot/toolset:send-email"
+HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" -X POST "$ADMIN_URL/budgets" \
+  -H "Content-Type: application/json" \
+  -H "X-Cycles-API-Key: $API_KEY" \
+  -d "{\"scope\": \"$SCOPE\", \"unit\": \"USD_MICROCENTS\", \"allocated\": {\"amount\": 0, \"unit\": \"USD_MICROCENTS\"}}")
+
+if [ "$HTTP_CODE" != "200" ] && [ "$HTTP_CODE" != "201" ] && [ "$HTTP_CODE" != "409" ]; then
+  echo "" >&2
+  echo "ERROR: Failed to create send-email budget (HTTP $HTTP_CODE)." >&2
+  echo "  Check logs with: docker compose logs cycles-admin" >&2
+  exit 1
+fi
+echo "  Toolset budgets: internal-notes ✓  crm-updates ✓  send-email ✗ (\$0)" >&2
 
 # Print only the API key to stdout
 echo "$API_KEY"

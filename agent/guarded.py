@@ -2,9 +2,9 @@
 Guarded agent — action authority enforced by Cycles.
 
 Identical workflow to unguarded.py, but each tool call is wrapped
-with @cycles using a toolset parameter. The Cycles server only has
-budgets for approved toolsets (internal-notes, crm-updates).
-The send-email toolset has no budget — Cycles blocks it.
+with @cycles using a toolset parameter. Approved toolsets (internal-notes,
+crm-updates) have a $1.00 budget. The send-email toolset has a $0
+budget — Cycles blocks it with 409 BUDGET_EXCEEDED.
 
 Three decorators. One except. The next unapproved action never executes.
 """
@@ -38,6 +38,9 @@ def _setup():
         base_url=os.environ["CYCLES_BASE_URL"],
         api_key=os.environ["CYCLES_API_KEY"],
         tenant=os.environ["CYCLES_TENANT"],
+        workspace="default",
+        app="default",
+        workflow="default",
         agent="support-bot",
     )
     set_default_client(CyclesClient(config))
