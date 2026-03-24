@@ -196,11 +196,11 @@ The key mechanism is **toolset-scoped budgets**. The provisioning script creates
 |---------|--------|--------|
 | `internal-notes` | $1.00 | ✓ Agent can append notes |
 | `crm-updates` | $1.00 | ✓ Agent can update CRM |
-| `send-email` | *none* | ✗ No budget → 409 |
+| `send-email` | $0 | ✗ Zero budget → 409 |
 
-When the `@cycles` decorator tries to reserve budget in a scope with no budget, the Cycles server returns `409 BUDGET_EXCEEDED`. The decorator raises `BudgetExceededError`, and the action never executes.
+When the `@cycles` decorator tries to reserve budget in a scope with a zero-dollar budget, the Cycles server returns `409 BUDGET_EXCEEDED`. The decorator raises `BudgetExceededError`, and the action never executes.
 
-This means you control agent capabilities at the budget provisioning level — no code changes needed to approve or revoke a tool. Add a budget for `send-email` and the agent can send emails. Remove it and the agent can't.
+This means you control agent capabilities at the budget provisioning level — no code changes needed to approve or revoke a tool. Increase the `send-email` budget and the agent can send emails. Set it to zero and the agent can't.
 
 ## Why this matters
 
