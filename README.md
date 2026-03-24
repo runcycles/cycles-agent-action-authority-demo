@@ -13,7 +13,7 @@ A support automation agent handles customer case #4782 (invoice discrepancy). Th
 3. **Update CRM status** — change the case from Open to Investigating
 4. **Send customer email** — reply to the customer with an update
 
-Steps 1–3 are internal, low-risk operations. Step 4 is a consequential, customer-facing action. In production, you want a human to approve outbound emails before they go out. Cycles enforces this by only provisioning budgets for approved toolsets.
+Steps 1–3 are internal, low-risk operations. Step 4 is a consequential, customer-facing action. In production, you want a human to approve outbound emails before they go out. Cycles enforces this by setting a zero-dollar budget for unapproved toolsets.
 
 Without Cycles, all four steps execute — including the email. With Cycles, the server returns `409 BUDGET_EXCEEDED` before the email send can proceed, and the agent reports: "Email blocked — not approved for autonomous execution. Escalated to human review."
 
@@ -89,8 +89,8 @@ The first three actions execute with green checkmarks. The fourth (send email) s
 ```
 ⚡ Cycles — Action Authority Demo
 
+Resetting stack (clean state)...
 Starting Cycles stack...
-Stack is up.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   MODE 1: Without Cycles
@@ -105,13 +105,20 @@ Stack is up.
 
 ╭──────────── Action Log ───────────────────────╮
 │  ✓ read_case                                  │
+│    Loaded case #4782 — Acme Corp              │
+│                                               │
 │  ✓ append_internal_note  [internal-notes]     │
+│    Billing discrepancy: $847 invoiced vs $720 contract. Investigating. │
+│                                               │
 │  ✓ update_crm_status     [crm-updates]        │
+│    Status: Open → Investigating               │
+│                                               │
 │  ✓ send_customer_email   [send-email]         │
+│    Email sent to jane@acme.com                │
 ╰───────────────────────────────────────────────╯
 
 ╭──────────── Result — UNGUARDED ───────────────╮
-│ All actions executed — including the email.   │
+│ All actions executed — including the customer email. │
 │ 4 actions approved · 0 actions blocked        │
 ╰───────────────────────────────────────────────╯
 
@@ -132,7 +139,7 @@ Stack is up.
 │                                               │
 │  ✓ append_internal_note  [internal-notes]     │
 │    POST /v1/reservations → 200 ALLOW          │
-│    Billing discrepancy: $847 vs $720          │
+│    Billing discrepancy: $847 invoiced vs $720 contract. Investigating. │
 │                                               │
 │  ✓ update_crm_status     [crm-updates]        │
 │    POST /v1/reservations → 200 ALLOW          │
@@ -140,7 +147,7 @@ Stack is up.
 │                                               │
 │  ✗ send_customer_email   [send-email]         │
 │    POST /v1/reservations → 409 BUDGET_EXCEEDED│
-│    Email blocked — not approved autonomously. │
+│    Email blocked — not approved for autonomous execution. Escalated to human review. │
 ╰───────────────────────────────────────────────╯
 
 ╭──────────── Result — GUARDED ─────────────────╮
@@ -151,12 +158,14 @@ Stack is up.
 
 Demo complete.
   Swagger UI:   http://localhost:7878/swagger-ui.html
+  Admin UI:     http://localhost:7979/swagger-ui.html
+  Re-run:       ./demo.sh
   Stop stack:   ./teardown.sh
 ```
 
 ## The code change
 
-The diff between `agent/unguarded.py` and `agent/guarded.py` is exactly this:
+The diff between `agent/unguarded.py` and `agent/guarded.py` is:
 
 ```python
 # --- Import the SDK ---
@@ -168,17 +177,20 @@ config = CyclesConfig(
     api_key=os.environ["CYCLES_API_KEY"],
     tenant=os.environ["CYCLES_TENANT"],
     agent="support-bot",
+    workspace="default",
+    app="default",
+    workflow="default",
 )
 set_default_client(CyclesClient(config))
 
 # --- Add three decorators with toolset scoping ---
-@cycles(estimate=COST, action_kind="tool.notes", action_name="append-note", toolset="internal-notes")
+@cycles(estimate=COST_PER_ACTION_MICROCENTS, action_kind="tool.notes", action_name="append-note", toolset="internal-notes")
 def append_internal_note(...): ...
 
-@cycles(estimate=COST, action_kind="tool.crm", action_name="update-status", toolset="crm-updates")
+@cycles(estimate=COST_PER_ACTION_MICROCENTS, action_kind="tool.crm", action_name="update-status", toolset="crm-updates")
 def update_crm_status(...): ...
 
-@cycles(estimate=COST, action_kind="tool.email", action_name="send-reply", toolset="send-email")
+@cycles(estimate=COST_PER_ACTION_MICROCENTS, action_kind="tool.email", action_name="send-reply", toolset="send-email")
 def send_customer_email(...): ...
 
 # --- Catch the budget exception ---
