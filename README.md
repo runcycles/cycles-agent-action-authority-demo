@@ -120,7 +120,7 @@ Starting Cycles stack...
 ╰───────────────────────────────────────────────────────╯
 
 ╭───────────────── Result — UNGUARDED ──────────────────╮
-│ All actions executed — including the customer email.   │
+│ All actions executed — including the customer email.  │
 │ 4 actions approved · 0 actions blocked                │
 ╰───────────────────────────────────────────────────────╯
 
