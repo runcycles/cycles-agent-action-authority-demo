@@ -96,65 +96,68 @@ Starting Cycles stack...
   MODE 1: Without Cycles
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-╭──────────── Support Case #4782 ───────────────╮
-│ Customer:  Acme Corp (jane@acme.com)          │
-│ Subject:   Invoice shows $847, contract $720  │
-│ Agent:     support-bot                        │
-│ Mode:      UNGUARDED                          │
-╰───────────────────────────────────────────────╯
+╭───────────────── Support Case #4782 ──────────────────╮
+│ Customer:  Acme Corp (jane@acme.com)                  │
+│ Subject:   Invoice shows $847, contract $720          │
+│ Agent:     support-bot                                │
+│ Mode:      UNGUARDED                                  │
+╰───────────────────────────────────────────────────────╯
 
-╭──────────── Action Log ───────────────────────╮
-│  ✓ read_case                                  │
-│    Loaded case #4782 — Acme Corp              │
-│                                               │
-│  ✓ append_internal_note  [internal-notes]     │
-│    Billing discrepancy: $847 invoiced vs $720 contract. Investigating. │
-│                                               │
-│  ✓ update_crm_status     [crm-updates]        │
-│    Status: Open → Investigating               │
-│                                               │
-│  ✓ send_customer_email   [send-email]         │
-│    Email sent to jane@acme.com                │
-╰───────────────────────────────────────────────╯
+╭───────────────── Action Log ──────────────────────────╮
+│                                                       │
+│  ✓ read_case                                          │
+│    Loaded case #4782 — Acme Corp                      │
+│                                                       │
+│  ✓ append_internal_note  [internal-notes]             │
+│    Billing discrepancy: $847 vs $720. Investigating.  │
+│                                                       │
+│  ✓ update_crm_status     [crm-updates]                │
+│    Status: Open → Investigating                       │
+│                                                       │
+│  ✓ send_customer_email   [send-email]                 │
+│    Email sent to jane@acme.com                        │
+│                                                       │
+╰───────────────────────────────────────────────────────╯
 
-╭──────────── Result — UNGUARDED ───────────────╮
-│ All actions executed — including the customer email. │
-│ 4 actions approved · 0 actions blocked        │
-╰───────────────────────────────────────────────╯
+╭───────────────── Result — UNGUARDED ──────────────────╮
+│ All actions executed — including the customer email.   │
+│ 4 actions approved · 0 actions blocked                │
+╰───────────────────────────────────────────────────────╯
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   MODE 2: With Cycles (action authority)
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-╭──────────── Support Case #4782 ───────────────╮
-│ Customer:  Acme Corp (jane@acme.com)          │
-│ Subject:   Invoice shows $847, contract $720  │
-│ Agent:     support-bot                        │
-│ Mode:      GUARDED                            │
-╰───────────────────────────────────────────────╯
+╭───────────────── Support Case #4782 ──────────────────╮
+│ Customer:  Acme Corp (jane@acme.com)                  │
+│ Subject:   Invoice shows $847, contract $720          │
+│ Agent:     support-bot                                │
+│ Mode:      GUARDED                                    │
+╰───────────────────────────────────────────────────────╯
 
-╭──────────── Action Log ───────────────────────╮
-│  ✓ read_case                                  │
-│    Loaded case #4782 — Acme Corp              │
-│                                               │
-│  ✓ append_internal_note  [internal-notes]     │
-│    POST /v1/reservations → 200 ALLOW          │
-│    Billing discrepancy: $847 invoiced vs $720 contract. Investigating. │
-│                                               │
-│  ✓ update_crm_status     [crm-updates]        │
-│    POST /v1/reservations → 200 ALLOW          │
-│    Status: Open → Investigating               │
-│                                               │
-│  ✗ send_customer_email   [send-email]         │
-│    POST /v1/reservations → 409 BUDGET_EXCEEDED│
-│    Email blocked — not approved for autonomous execution. Escalated to human review. │
-╰───────────────────────────────────────────────╯
+╭───────────────── Action Log ──────────────────────────╮
+│                                                       │
+│  ✓ read_case                                          │
+│    Loaded case #4782 — Acme Corp                      │
+│                                                       │
+│  ✓ append_internal_note  [internal-notes]             │
+│    POST /v1/reservations → 200 ALLOW                  │
+│    Billing discrepancy: $847 vs $720. Investigating.  │
+│                                                       │
+│  ✓ update_crm_status     [crm-updates]                │
+│    POST /v1/reservations → 200 ALLOW                  │
+│    Status: Open → Investigating                       │
+│                                                       │
+│  ✗ send_customer_email   [send-email]                 │
+│    POST /v1/reservations → 409 BUDGET_EXCEEDED        │
+│    Email blocked — escalated to human review.         │
+│                                                       │
+╰───────────────────────────────────────────────────────╯
 
-╭──────────── Result — GUARDED ─────────────────╮
-│ Cycles blocked the customer email before it   │
-│ was sent.                                     │
-│ 3 actions approved · 1 action blocked         │
-╰───────────────────────────────────────────────╯
+╭───────────────── Result — GUARDED ────────────────────╮
+│ Cycles blocked the customer email before it was sent. │
+│ 3 actions approved · 1 action blocked                 │
+╰───────────────────────────────────────────────────────╯
 
 Demo complete.
   Swagger UI:   http://localhost:7878/swagger-ui.html
