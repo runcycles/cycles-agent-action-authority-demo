@@ -9,6 +9,7 @@ from typing import Optional
 
 from rich.console import Console, Group
 from rich.panel import Panel
+from rich.table import Table
 from rich.text import Text
 
 
@@ -64,6 +65,41 @@ class DemoDisplay:
             title=f"[bold]Support Case #{s.case_id}[/bold]",
             border_style=style,
         ))
+        self.console.print()
+
+    def print_action_step(self, action: ActionResult) -> None:
+        """Print a single action step inline (not in a panel).
+
+        Used by the recording orchestrator and render_demo.py to stream
+        each step into the terminal as the agent executes it, so the GIF
+        shows the action log filling in over time. The end-of-run
+        ``print_action_log`` panel is the alternative path used by
+        ``unguarded.py`` / ``guarded.py`` for the live demo.
+        """
+        if action.allowed:
+            marker = Text("  ✓ ", style="bold green")
+        else:
+            marker = Text("  ✗ ", style="bold red")
+
+        header = Text()
+        header.append_text(marker)
+        header.append(action.name, style="bold")
+        if action.toolset:
+            header.append(f"  [{action.toolset}]", style="dim")
+        self.console.print(header)
+
+        if action.cycles_response:
+            resp_style = "green" if action.allowed else "red"
+            self.console.print(Text(
+                f"    POST /v1/reservations → {action.cycles_response}",
+                style=resp_style,
+            ))
+
+        if action.allowed:
+            self.console.print(Text(f"    {action.detail}", style="dim"))
+        else:
+            self.console.print(Text(f"    {action.detail}", style="red bold"))
+
         self.console.print()
 
     def print_action_log(self) -> None:
@@ -150,3 +186,76 @@ class DemoDisplay:
             title=f"[bold]Result \u2014 {s.mode}[/bold]",
             border_style=style,
         ))
+
+    @staticmethod
+    def build_summary_panel(unguarded: "DemoState", guarded: "DemoState") -> Panel:
+        """Two-column green summary card shown at the end of the recording.
+
+        Structurally parallel to the runaway demo's summary card: same
+        "Same agent \u00b7 same workflow \u00b7 two outcomes" frame, but the
+        contrast is binary (email sent vs blocked) rather than dollar
+        projections. The visceral payload here is action authority:
+        per-toolset budgets stop the consequential action without
+        touching the internal ones.
+        """
+        col_w = 24
+
+        def line(label: str, value: str, style: str) -> Text:
+            return Text(
+                f"{label.ljust(col_w - len(value))}{value}",
+                style=style,
+            )
+
+        t = Table.grid(padding=(0, 4), expand=True)
+        t.add_column(justify="center", ratio=1)
+        t.add_column(justify="center", ratio=1)
+
+        u_total = len(unguarded.actions)
+        u_blocked = unguarded.blocked_count
+        g_total = len(guarded.actions)
+        g_blocked = guarded.blocked_count
+
+        left = Group(
+            Text("Without Cycles", style="bold red"),
+            Text(f"{u_total - u_blocked} / {u_total} actions executed",
+                 style="bold red"),
+            Text("(including the customer email)", style="dim red"),
+            Text(""),
+            Text("Per-toolset authority:", style="bold red"),
+            line("internal-notes",  "\u25b6 ran",  "red"),
+            line("crm-updates",     "\u25b6 ran",  "red"),
+            line("send-email",      "\u25b6 SENT", "red bold"),
+            Text(""),
+            Text("no authorization gate", style="red"),
+        )
+        right = Group(
+            Text("With Cycles", style="bold green"),
+            Text(f"{g_total - g_blocked} / {g_total} actions executed \u00b7 "
+                 f"{g_blocked} blocked", style="bold green"),
+            Text("(customer email blocked before send)", style="dim green"),
+            Text(""),
+            Text("Per-toolset authority:", style="bold green"),
+            line("internal-notes",  "\u2713 ALLOW", "green"),
+            line("crm-updates",     "\u2713 ALLOW", "green"),
+            line("send-email",      "\u2717 DENY",  "green bold"),
+            Text(""),
+            Text("escalated to human review", style="green"),
+        )
+        t.add_row(left, right)
+
+        body = Group(
+            t,
+            Text(""),
+            Text(
+                "Action authority: per-toolset budgets \u2014 set $0 to deny, "
+                "$N to allow. No agent-code change needed.",
+                style="dim",
+                justify="center",
+            ),
+        )
+
+        return Panel(
+            body,
+            title="[bold green]Same agent. Same workflow. Two outcomes.[/bold green]",
+            border_style="green",
+        )
