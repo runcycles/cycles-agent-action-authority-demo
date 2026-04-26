@@ -85,6 +85,31 @@ docker compose down -v && docker compose up -d
 
 ![Cycles Action Authority Demo](demo.gif)
 
+The GIF runs both modes back to back in ~30 seconds: the unguarded
+segment sends the customer email unchecked, then "MODE 2: WITH CYCLES"
+runs the same workflow and the email is blocked at the `send-email`
+toolset (zero-dollar budget → 409 BUDGET_EXCEEDED). The end card
+contrasts `4 / 4 actions executed` against `3 / 4 executed · 1 blocked`
+and shows the per-toolset authority decisions.
+
+For homepage embedding, also available as `demo.mp4` (H.264) and
+`demo.webm` (VP9). All assets are recorded at 2000×1200 (2× retina
+density) so text stays crisp on HiDPI displays even when the browser
+scales them down to ~1000×600 for layout. Both videos autoplay inline:
+
+```html
+<video autoplay loop muted playsinline poster="demo-action-authority-poster.png">
+  <source src="demo.webm" type="video/webm">
+  <source src="demo.mp4" type="video/mp4">
+  <img src="demo.gif" alt="Cycles Action Authority Demo">
+</video>
+```
+
+`demo-action-authority-poster.png` is the last-frame summary card —
+used as the `poster` attribute so autoplay-blocked browsers, slow-
+network first paint, and social/SEO link previews all show the
+`SENT` vs `DENY` contrast even before the video plays.
+
 ### Without Cycles
 
 All four actions execute with green checkmarks — including the customer email. The final panel reads:
