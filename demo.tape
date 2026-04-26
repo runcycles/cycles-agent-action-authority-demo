@@ -33,7 +33,8 @@ Show
 Type "python3 agent/record_orchestrator.py"
 Enter
 
-# Total budget: ~10s unguarded (4 actions × 0.8s step delay + ~1s tool
-# latency + 2s final hold) + 1.5s interstitial + ~10s guarded + 3.5s
-# BUDGET_EXCEEDED hold + 5s summary + small startup + buffer ≈ 35s.
-Sleep 35s
+# Total budget: ~6s unguarded (4 actions × 0.8s step delay + ~0.2s tool
+# latency each + 2s final hold) + 1.5s interstitial + ~10s guarded
+# (network round-trips to Cycles add ~0.4s/call) + 3.5s BUDGET_EXCEEDED
+# hold + 5s summary + small startup + buffer ≈ 28s.
+Sleep 28s

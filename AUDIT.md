@@ -101,14 +101,26 @@ Defined at the top of `agent/record_orchestrator.py`:
 | `BUDGET_EXCEEDED_HOLD_S` | 3.5 | Lets the GUARDED final panel ("Cycles blocked the customer email…") register before the summary. Mirrors runaway. |
 | `SUMMARY_HOLD_S` | 5.0 | Final summary card hold. Mirrors runaway. |
 
-### Asset sizes (target — matches runaway demo, regenerate to populate)
+### Asset sizes (regenerated)
 
-| Asset | Before | After (target) |
+| Asset | Before | After |
 |---|---|---|
-| `demo.gif` | 363K (1×, single-mode) | ~4M (2×, side-by-side) |
-| `demo.mp4` | (n/a) | ~1M |
-| `demo.webm` | (n/a) | ~1.5M |
-| `demo-action-authority-poster.png` | (n/a) | ~300K |
+| `demo.gif` | 363K (1×, single-mode) | 1.0M (2×, side-by-side) |
+| `demo.mp4` | (n/a) | 699K |
+| `demo.webm` | (n/a) | 784K |
+| `demo-action-authority-poster.png` | (n/a) | 390K |
+
+The action-authority GIF compresses smaller than the runaway GIF
+(4.2M) because the action authority panels render once per step
+rather than refreshing 10× per second — far fewer frame-to-frame
+deltas for the GIF encoder to chase.
+
+Total recording duration: 29.6s. Tape sleep is 28s; the orchestrator's
+natural runtime is ~22s (4 unguarded steps × 1s + 2s hold + 1.5s
+interstitial + 4 guarded steps × ~1.5s + 3.5s hold + 5s summary), so
+~6s of trailing prompt tail is left at the end of the GIF — the
+summary card stays on screen during that tail because it's the last
+thing printed before `main()` exits.
 
 ### Verification performed in this change
 
@@ -119,8 +131,10 @@ Defined at the top of `agent/record_orchestrator.py`:
   `print_action_step` and `build_summary_panel` import cleanly.
 - `python3 render_demo.py both` — the docker-free render path still
   works after the `print_action_step` move.
-- Full end-to-end recording (`./record.sh` → docker + vhs + ffmpeg)
-  is **deferred to a host with the toolchain**. The four binary
-  artifacts (`demo.gif`, `demo.mp4`, `demo.webm`,
-  `demo-action-authority-poster.png`) will land in a follow-up commit
-  once they've been regenerated.
+- `pytest agent/tests/` — 13 / 13 passing.
+- **End-to-end recording executed** (`./record.sh` against a fresh
+  Cycles stack on Ubuntu 24.04 with vhs 0.11.0 + Google Chrome 147 +
+  ffmpeg 6.1.1). All four binary artifacts produced and committed
+  alongside this audit entry. Spot-checked frames at 5s (MODE 1
+  unguarded, action log filling in), 12s (MODE 2 guarded with `200
+  ALLOW` responses), and 22s (summary card with `SENT` vs `DENY`).
