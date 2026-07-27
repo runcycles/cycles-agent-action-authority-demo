@@ -5,6 +5,15 @@ that produces them. The live demo behavior (`./demo.sh`) and the agent code
 (`agent/unguarded.py`, `agent/guarded.py`, `agent/tools.py`) are
 intentionally unchanged by anything below — only the recording pipeline.
 
+## 2026-07-27 — CI Python setup action 7
+
+Dependabot PR #27 updates all three `actions/setup-python` CI steps from major
+6 to major 7. The new action uses an ESM runtime and removes the optional
+`pip-install` action input; this workflow never used that input. Its separate
+`pip-install` job remains unchanged and passed alongside lint and test on the
+reviewed head. Demo code, recorded assets, dependencies, and live behavior are
+unchanged.
+
 ## 2026-04-26 — Side-by-side recording, 2× retina, video assets
 
 Brings the recording pipeline to parity with `cycles-runaway-demo`'s
